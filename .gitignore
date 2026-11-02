@@ -105,3 +105,8 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+
+# dluengo: Ignore VS stuff
+/[Pp]ackages/com.merry-yellow.code-assist*
+/[Pp]ackages/packages-lock.json*
