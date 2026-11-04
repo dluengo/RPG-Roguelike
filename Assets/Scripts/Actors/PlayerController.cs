@@ -8,7 +8,6 @@ public class PlayerController : ActorController
 
     public void OnMove(InputValue input)
     {
-        Debug.Log($"Move input received: {input.Get<Vector2>()}");
         moveInput = input.Get<Vector2>();
     }
 }

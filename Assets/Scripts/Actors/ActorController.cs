@@ -1,5 +1,6 @@
+using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
+using static UnityEngine.UI.Image;
 
 public abstract class ActorController : MonoBehaviour
 {
@@ -11,15 +12,11 @@ public abstract class ActorController : MonoBehaviour
         private set => m_moveSpeed = value;
     }
 
-    protected Rigidbody2D rb;
-    protected Animator animator;
-
     [SerializeField] private Vector2 m_faceDir = Vector2.right;
     public Vector2 faceDir
     {
         get => m_faceDir;
         protected set {
-            Debug.Log($"faceDir set to {value}");
             if (value.sqrMagnitude > m_moveThreshold) {
                 m_faceDir = value.normalized;
             }
@@ -40,7 +37,14 @@ public abstract class ActorController : MonoBehaviour
         }
     }
 
-    private float m_moveThreshold = 0.1f;
+    [SerializeField] protected GameObject m_popupPrefab;
+
+    protected Rigidbody2D rb;
+    protected Animator animator;
+    protected HealthController health;
+    protected float m_moveThreshold = 0.1f;
+    protected bool canMove = true;
+    protected float m_dmgPopupDuration = 0.3f;
 
 
     // ---------- Unity Methods ----------
@@ -52,6 +56,23 @@ public abstract class ActorController : MonoBehaviour
 
         animator = GetComponent<Animator>();
         Debug.Assert(animator != null, $"object {name} doesn't have an Animator component");
+
+        // NOTE: Actors are allowed to not have a HealthController.
+        health = GetComponent<HealthController>();
+    }
+
+    protected virtual void OnEnable()
+    {
+        if (health != null) {
+            health.OnDamageTaken += DamageTakenHandler;
+        }
+    }
+
+    protected virtual void OnDisable()
+    {
+        if (health != null) {
+            health.OnDamageTaken -= DamageTakenHandler;
+        }
     }
 
     protected virtual void OnValidate()
@@ -61,7 +82,17 @@ public abstract class ActorController : MonoBehaviour
 
     protected virtual void FixedUpdate()
     {
-        rb.linearVelocity = moveInput * moveSpeed;
+        if (canMove) {
+            rb.linearVelocity = moveInput * moveSpeed;
+        }
+    }
+
+
+    // ---------- Public Methods ----------
+
+    public void Knockback(Transform origin, float force, float duration)
+    {
+        StartCoroutine(KnockbackCR(origin, force, duration));
     }
 
 
@@ -71,6 +102,13 @@ public abstract class ActorController : MonoBehaviour
     {
         if (moveInput.sqrMagnitude > m_moveThreshold) {
             faceDir = moveInput.normalized;
+
+            Vector3 newScale = transform.localScale;
+            if (faceDir.x < -m_moveThreshold && newScale.x > 0 ||
+                faceDir.x > m_moveThreshold && newScale.x < 0) {
+                newScale.x *= -1;
+                transform.localScale = newScale;
+            }
         }
     }
 
@@ -86,6 +124,33 @@ public abstract class ActorController : MonoBehaviour
             animator.SetBool("IsMoving", true);
         } else {
             animator.SetBool("IsMoving", false);
+        }
+    }
+
+    private IEnumerator KnockbackCR(Transform origin, float force, float duration)
+    {
+        canMove = false;
+
+        Vector2 knockbackDir = (transform.position - origin.position).normalized;
+        rb.linearVelocity = knockbackDir * force;
+
+        yield return new WaitForSeconds(duration);
+
+        rb.linearVelocity = Vector2.zero;
+        canMove = true;
+    }
+
+    private void DamageTakenHandler(int damage)
+    {
+        animator.SetTrigger("TurnRed");
+
+        GameObject popupGO = Instantiate(m_popupPrefab, transform.position, Quaternion.identity);
+        if (popupGO != null) {
+
+            PopupController popup = popupGO.GetComponent<PopupController>();
+            if (popup != null) {
+                popup.Setup(m_dmgPopupDuration, damage.ToString());
+            }
         }
     }
 }
