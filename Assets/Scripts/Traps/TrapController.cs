@@ -40,13 +40,13 @@ public class TrapController : MonoBehaviour
     }
 
     protected Animator anim;
+    protected string m_playerTag = "Player";
 
     private AnimatorOverrideController m_animOverrideController;
     private string m_activateAnimParamName = "Activate";
     private string m_activateClipName = "Activate-default";
     private string m_deactivateClipName = "Deactivate-default";
     private string m_idleClipName = "Idle-default";
-    private string m_playerTag = "Player";
 
     private bool m_onCooldown = false;
 
@@ -96,20 +96,25 @@ public class TrapController : MonoBehaviour
             return;
         }
 
-        Debug.Log("Activating trap");
         anim.SetTrigger(m_activateAnimParamName);
         OnActivate?.Invoke();
 
         StartCoroutine(TrapCooldown());
 
-        HealthController health = collision.GetComponent<HealthController>();
-        if (health != null) {
-            health.TakeDamage(damage);
-        }
+        DoTrapLogic(collision);
+    }
 
+    protected virtual void DoTrapLogic(Collider2D collision)
+    {
         ActorController actor = collision.GetComponent<ActorController>();
-        if (actor != null && knockbackForce > 0) {
-            actor.Knockback(transform, knockbackForce, knockbackDuration);
+        if (actor != null) {
+            if (damage > 0) {
+                actor.TakeDamage(damage);
+            }
+
+            if (knockbackForce > 0f && knockbackDuration > 0f) {
+                actor.Knockback(transform, knockbackForce, knockbackDuration);
+            }
         }
     }
 

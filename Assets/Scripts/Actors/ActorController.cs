@@ -90,6 +90,13 @@ public abstract class ActorController : MonoBehaviour
 
     // ---------- Public Methods ----------
 
+    public void TakeDamage(int damage)
+    {
+        if (health != null) {
+            health.TakeDamage(damage);
+        }
+    }
+
     public void Knockback(Transform origin, float force, float duration)
     {
         StartCoroutine(KnockbackCR(origin, force, duration));
