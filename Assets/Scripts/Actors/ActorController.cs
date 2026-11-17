@@ -5,7 +5,7 @@ using static UnityEngine.UI.Image;
 public abstract class ActorController : MonoBehaviour
 {
     // ---------- Members ----------
-
+    [Header("--- ActorController Settings ---")]
     [SerializeField] protected float m_moveSpeed = 5f;
     public float moveSpeed {
         get => m_moveSpeed;
