@@ -11,8 +11,9 @@ public class Chase : Movement
 
 
     // ---------- Unity Methods ----------
-    protected virtual void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         Debug.Assert(target != null, $"object {name} doesn't have a target assigned");
     }
 }

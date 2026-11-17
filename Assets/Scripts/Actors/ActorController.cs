@@ -16,9 +16,10 @@ public abstract class ActorController : MonoBehaviour
     public Vector2 faceDir
     {
         get => m_faceDir;
-        protected set {
+        set {
             if (value.sqrMagnitude > m_moveThreshold) {
                 m_faceDir = value.normalized;
+                CheckAndFlipDir();
             }
         }
     }
@@ -110,12 +111,7 @@ public abstract class ActorController : MonoBehaviour
         if (moveInput.sqrMagnitude > m_moveThreshold) {
             faceDir = moveInput.normalized;
 
-            Vector3 newScale = transform.localScale;
-            if (faceDir.x < -m_moveThreshold && newScale.x > 0 ||
-                faceDir.x > m_moveThreshold && newScale.x < 0) {
-                newScale.x *= -1;
-                transform.localScale = newScale;
-            }
+            CheckAndFlipDir();
         }
     }
 
@@ -158,6 +154,16 @@ public abstract class ActorController : MonoBehaviour
             if (popup != null) {
                 popup.Setup(m_dmgPopupDuration, damage.ToString());
             }
+        }
+    }
+
+    private void CheckAndFlipDir()
+    {
+        Vector3 newScale = transform.localScale;
+        if (faceDir.x < -m_moveThreshold && newScale.x > 0 ||
+            faceDir.x > m_moveThreshold && newScale.x < 0) {
+            newScale.x *= -1;
+            transform.localScale = newScale;
         }
     }
 }

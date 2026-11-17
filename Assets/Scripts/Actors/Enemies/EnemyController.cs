@@ -3,7 +3,7 @@ using UnityEngine;
 public class EnemyController : ActorController
 {
     // ---------- Members ----------
-    protected Movement move;
+    [SerializeField] protected Movement move;
 
 
     // ---------- Unity Methods ----------
@@ -11,7 +11,8 @@ public class EnemyController : ActorController
     {
         base.Awake();
         
-        move = GetComponent<Movement>();
+        // NOTE: For testing purposes we set the movement script through the inspector.
+        //move = GetComponent<Movement>();
         Debug.Assert(move != null, $"object {name} doesn't have a Movement component");
     }
 
