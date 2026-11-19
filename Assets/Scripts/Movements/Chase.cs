@@ -1,19 +1,17 @@
 using System;
+using System.Reflection.Metadata.Ecma335;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class Chase : Movement
+public class Chase : MovementBase
 {
-    // ---------- Members ----------
-    [Header("--- Chase Settings ---")]
-    [SerializeField] protected Transform target;
-
-    public override Vector2 direction { get => (target.position - transform.position).normalized; }
+    // ---------- Members ---------- 
+    public Transform target;
 
 
-    // ---------- Unity Methods ----------
-    protected override void Awake()
+    // ---------- Unity Methods ---------- 
+    protected virtual void Update()
     {
-        base.Awake();
-        Debug.Assert(target != null, $"object {name} doesn't have a target assigned");
+        direction = (target.position - transform.position).normalized;
     }
 }
