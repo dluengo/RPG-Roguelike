@@ -52,7 +52,7 @@ public class MeleeAttack : AttackBase
         hitArea.Cast(Vector2.zero, filter, hits, 0, true);
         hitArea.enabled = false;
         foreach (RaycastHit2D hit in hits) {
-            ActorController actorHit = hit.transform.gameObject.GetComponent<ActorController>();
+            ActorController actorHit = hit.transform.GetComponent<ActorController>();
             if (actorHit) {
                 actorHit.TakeDamage(damage);
             }
@@ -66,16 +66,6 @@ public class MeleeAttack : AttackBase
     {
         
     }
-
-
-    // ---------- Collision Detection Methods ----------
-    //protected void OnTriggerEnter2D(Collider2D collision)
-    //{
-    //    ActorController actorHit = collision.GetComponent<ActorController>();
-    //    if (actorHit != null) {
-    //        actorHit.TakeDamage(damage);
-    //    }
-    //}
 
 
     // ---------- Event Handlers ---------- 
