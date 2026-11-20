@@ -19,24 +19,16 @@ public class MeleeAttack : AttackBase
         }
     }
 
-    protected virtual void OnEnable()
-    {
-        actor.OnAttackAnimationEnd += AttackEndHandler;
-    }
 
-    protected virtual void OnDisable()
+    // ---------- AttackBase Interfaces ----------
+    public override bool StartAttack()
     {
-        actor.OnAttackAnimationEnd -= AttackEndHandler;
-    }
-
-
-    // ---------- Animation Event Methods ----------
-    public override void StartAttack()
-    {
-        if (!actor.isAttacking) {
+        if (base.StartAttack()) {
             actor.SetMovementEnable(false);
-            actor.Attack();
+            return true;
         }
+
+        return false;
     }
 
     public override void TryHit()
@@ -64,13 +56,8 @@ public class MeleeAttack : AttackBase
 
     public override void EndAttack()
     {
-        
-    }
-
-
-    // ---------- Event Handlers ---------- 
-    private void AttackEndHandler()
-    {
         actor.SetMovementEnable(true);
+
+        base.EndAttack();
     }
 }

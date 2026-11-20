@@ -1,3 +1,6 @@
+using System;
+using System.Collections;
+using TMPro.EditorUtilities;
 using UnityEngine;
 
 [RequireComponent(typeof(ActorController))]
@@ -13,7 +16,25 @@ public abstract class AttackBase : MonoBehaviour
         protected set => m_damage = value;
     }
 
+    [SerializeField] protected float m_cooldown = 1;
+    public float cooldown
+    {
+        get => m_cooldown;
+        protected set => m_cooldown = value;
+    }
+
+    protected bool m_attackOnCooldown = false;
+    public bool attackOnCooldown
+    {
+        get => m_attackOnCooldown;
+        protected set => m_attackOnCooldown = value;
+    }
+
     protected ActorController actor;
+
+
+    // ---------- Events ---------- 
+    public event Action OnAttackEnd;
 
 
     // ---------- Unity Methods ----------
@@ -25,17 +46,57 @@ public abstract class AttackBase : MonoBehaviour
         Debug.Assert(attackAnimationClip != null, $"object {name} doesn't have an AnimationClip component");
     }
 
+    protected virtual void OnEnable()
+    {
+        actor.OnAttackAnimationEnd += AttackAnimationEndHandler;
+    }
+
+    protected virtual void OnDisable()
+    {
+        actor.OnAttackAnimationEnd -= AttackAnimationEndHandler;
+    }
+
     protected void OnValidate()
     {
         damage = m_damage;
+        cooldown = m_cooldown;
     }
 
 
     // ---------- Animation Event Methods ---------- 
-    // NOTE: The attack animation clip SHOULD have an animation event bound
-    // to this method.
-    //public abstract void ThrowAttack();
-    public abstract void StartAttack();
+    public virtual bool StartAttack()
+    {
+        if (!actor.isAttacking && !attackOnCooldown) {
+            actor.Attack();
+
+            StartCoroutine(AttackCooldownCR(cooldown));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    // NOTE: The animation clip SHOULD bind an animation event to this method
     public abstract void TryHit();
-    public abstract void EndAttack();
+
+    public virtual void EndAttack()
+    {
+        OnAttackEnd?.Invoke();
+    }
+
+
+    // ---------- Coroutines ----------
+    protected IEnumerator AttackCooldownCR(float cooldown)
+    {
+        attackOnCooldown = true;
+        yield return new WaitForSeconds(cooldown);
+        attackOnCooldown = false;
+    }
+
+    // ---------- Event Handlers ---------- 
+    protected virtual void AttackAnimationEndHandler()
+    {
+        EndAttack();
+    }
 }

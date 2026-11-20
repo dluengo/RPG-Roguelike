@@ -147,12 +147,10 @@ public abstract class ActorController : MonoBehaviour
             if (movement != null) {
                 if (movement.speed > 0) {
                     if (movement.direction.sqrMagnitude > movement.moveThreshold) {
-                        if (canMove) {
-                            isMoving = true;
-                            rb.linearVelocity = movement.direction * movement.speed;
-                            UpdateDirection();
-                            return;
-                        }
+                        isMoving = true;
+                        rb.linearVelocity = movement.direction * movement.speed;
+                        UpdateDirection();
+                        return;
                     }
                     else {
                         // No movement input.
