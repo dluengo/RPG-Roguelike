@@ -6,9 +6,9 @@ public class AttackAnimBehaviour : StateMachineBehaviour
     public event Action OnAttackAnimEnd;
 
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
-    //override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    //public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     //{
-    //    
+
     //}
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
@@ -18,8 +18,15 @@ public class AttackAnimBehaviour : StateMachineBehaviour
     //}
 
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
-    override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        //Debug.Log(
+        //    $"EXIT frame={Time.frameCount}, " +
+        //    $"hash={stateInfo.fullPathHash}, " +
+        //    $"length={stateInfo.length}, " +
+        //    $"normalizedTime={stateInfo.normalizedTime}, " +
+        //    $"inTransition={animator.IsInTransition(layerIndex)}");
+
         OnAttackAnimEnd?.Invoke();
     }
 

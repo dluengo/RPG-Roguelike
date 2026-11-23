@@ -21,9 +21,9 @@ public class MeleeAttack : AttackBase
 
 
     // ---------- AttackBase Interfaces ----------
-    public override bool StartAttack()
+    public override bool StartAttack(Vector2 direction)
     {
-        if (base.StartAttack()) {
+        if (base.StartAttack(direction)) {
             actor.SetMovementEnable(false);
             return true;
         }
@@ -31,7 +31,7 @@ public class MeleeAttack : AttackBase
         return false;
     }
 
-    public override void TryHit()
+    public virtual void TryHit()
     {
         List<RaycastHit2D> hits = new List<RaycastHit2D>();
         ContactFilter2D filter = new ContactFilter2D();

@@ -40,7 +40,8 @@ public class TrapController : MonoBehaviour
     }
 
     protected Animator anim;
-    protected string m_playerTag = "Player";
+    //protected string m_playerTag = "Player";
+    protected LayerMask m_playerLayer;
 
     private AnimatorOverrideController m_animOverrideController;
     private string m_activateAnimParamName = "Activate";
@@ -61,7 +62,9 @@ public class TrapController : MonoBehaviour
         anim = GetComponent<Animator>();
         Debug.Assert(anim != null, $"object {name} doesn't have an Animator component");
 
-        SetupAnimationClips();     
+        m_playerLayer = LayerMask.GetMask("Player");
+
+        SetupAnimationClips();
     }
 
     protected virtual void OnValidate()
@@ -76,14 +79,14 @@ public class TrapController : MonoBehaviour
     // ---------- Collision Methods ----------
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag(m_playerTag)) {
+        if (collision.gameObject.layer == m_playerLayer) {
             ActivateTrap(collision);
         }
     }
 
     protected virtual void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.CompareTag(m_playerTag)) {
+        if (collision.gameObject.layer == m_playerLayer) {
             ActivateTrap(collision);
         }
     }

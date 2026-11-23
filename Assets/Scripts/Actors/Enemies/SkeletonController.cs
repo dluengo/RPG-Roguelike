@@ -1,21 +1,16 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class SkeletonController : EnemyController
 {
     // ---------- Unity Methods ---------- 
     protected override void Update()
     {
-        if (distanceToTarget <= rangeStartAttacking) {
-            attack.StartAttack();
-        }
-        else {
-            // Move towards target.
-        }
-    }
+        if (distanceToTarget <= rangeStartAttacking && !isAttacking && !attack.onCooldown) {
+            //Vector2 dirToTarget = (target.position - transform.position).normalized;
+            //attack.StartAttack(dirToTarget);
 
-    protected override void OnValidate()
-    {
-        base.OnValidate();
-        rangeStartAttacking = m_rangeStartAttacking;
+            attack.StartAttack(target);
+        }
     }
 }

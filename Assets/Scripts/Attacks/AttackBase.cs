@@ -8,7 +8,12 @@ public abstract class AttackBase : MonoBehaviour
 {
     // ---------- Members ----------
     [Header("--- AttackBase Settings ---")]
-    [SerializeField] protected AnimationClip attackAnimationClip;
+    [SerializeField] protected AnimationClip m_animationClip;
+    public AnimationClip animationClip
+    {
+        get => m_animationClip;
+        protected set => m_animationClip = value;
+    }
     [SerializeField] protected int m_damage;
     public int damage
     {
@@ -23,17 +28,31 @@ public abstract class AttackBase : MonoBehaviour
         protected set => m_cooldown = value;
     }
 
-    protected bool m_attackOnCooldown = false;
-    public bool attackOnCooldown
+    //// NOTE: When range is 0 internally we decide a value for it.
+    //[SerializeField] protected float m_range = 0;
+    //public float range
+    //{
+    //    get => m_range;
+    //    protected set => m_range = value;
+    //}
+
+    protected bool m_onCooldown = false;
+    public bool onCooldown
     {
-        get => m_attackOnCooldown;
-        protected set => m_attackOnCooldown = value;
+        get => m_onCooldown;
+        protected set => m_onCooldown = value;
     }
 
     protected ActorController actor;
 
+    protected float knockbackForce = 15;
+    protected float knockbackDuration = 0.1f;
+
+    protected Transform target = null;
+
 
     // ---------- Events ---------- 
+    public event Action<Collider2D> OnAttackHit;
     public event Action OnAttackEnd;
 
 
@@ -43,7 +62,7 @@ public abstract class AttackBase : MonoBehaviour
         actor = GetComponent<ActorController>();
         Debug.Assert(actor != null, $"object {name} doesn't have an ActorController component");
 
-        Debug.Assert(attackAnimationClip != null, $"object {name} doesn't have an AnimationClip component");
+        Debug.Assert(animationClip != null, $"object {name} doesn't have an AnimationClip component");
     }
 
     protected virtual void OnEnable()
@@ -60,14 +79,21 @@ public abstract class AttackBase : MonoBehaviour
     {
         damage = m_damage;
         cooldown = m_cooldown;
+        //range = m_range;
     }
 
 
     // ---------- Animation Event Methods ---------- 
-    public virtual bool StartAttack()
+    public bool StartAttack()
     {
-        if (!actor.isAttacking && !attackOnCooldown) {
-            actor.Attack();
+        return StartAttack(actor.faceDir);
+    }
+
+    public virtual bool StartAttack(Vector2 direction)
+    {
+        if (!actor.isAttacking && !onCooldown) {
+            //Debug.Log($"obj {name} starts attacking in direction {direction}, frame {Time.frameCount}");
+            actor.Attack(direction.normalized);
 
             StartCoroutine(AttackCooldownCR(cooldown));
 
@@ -77,11 +103,18 @@ public abstract class AttackBase : MonoBehaviour
         return false;
     }
 
-    // NOTE: The animation clip SHOULD bind an animation event to this method
-    public abstract void TryHit();
+    public virtual bool StartAttack(Transform target)
+    {
+        Vector2 attackDir = (target.position - transform.position).normalized;
+        bool canAttack = StartAttack(attackDir);
+        this.target = canAttack ? target : null;
+        return canAttack;
+    }
 
     public virtual void EndAttack()
     {
+        //Debug.Log($"obj {name} ends attack, frame {Time.frameCount}");
+        target = null;
         OnAttackEnd?.Invoke();
     }
 
@@ -89,9 +122,9 @@ public abstract class AttackBase : MonoBehaviour
     // ---------- Coroutines ----------
     protected IEnumerator AttackCooldownCR(float cooldown)
     {
-        attackOnCooldown = true;
+        onCooldown = true;
         yield return new WaitForSeconds(cooldown);
-        attackOnCooldown = false;
+        onCooldown = false;
     }
 
     // ---------- Event Handlers ---------- 

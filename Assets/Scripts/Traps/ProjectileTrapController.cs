@@ -9,15 +9,15 @@ public class ProjectileTrapController : TrapController
     [SerializeField] protected float projectileSpeed = 10f;
     [SerializeField] protected Vector2 projectileDirection = Vector2.right;
 
-    private Transform m_launchPosition;
-    private string m_launchPositionName = "LaunchPoint";
+    [SerializeField] protected Transform m_launchPosition;
 
 
     // ---------- Unity Methods ----------
     protected override void Awake()
     {
         base.Awake();
-        m_launchPosition = transform.Find(m_launchPositionName);
+        
+        Debug.Assert(m_launchPosition != null, $"object {name} doesn't a launch position set");
     }
 
 
@@ -31,20 +31,17 @@ public class ProjectileTrapController : TrapController
 
 
     // ---------- Animation Event Methods----------
-    public void Shot()
+    public void Shoot()
     {
-        GameObject projectileGO = Instantiate(projectilePrefab, m_launchPosition.position, Quaternion.identity);
-        if (projectileGO != null) {
-            ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
-
-            projectile.enemyTag = m_playerTag;
-            projectile.damage = damage;
-            projectile.knockbackForce = knockbackForce;
-            projectile.knockbackDuration = knockbackDuration;
-
-            Rigidbody2D rb = projectileGO.GetComponent<Rigidbody2D>();
-            rb.linearVelocity = projectileDirection.normalized * projectileSpeed;
-        }
+        ProjectileController newProjectile = ProjectileController.CreateProjectile(
+            projectilePrefab,
+            m_launchPosition.position,
+            projectileDirection,
+            0,
+            m_playerLayer,
+            damage,
+            projectileSpeed,
+            knockbackForce,
+            knockbackDuration);
     }
-
 }

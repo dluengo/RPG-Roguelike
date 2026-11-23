@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -77,8 +78,32 @@ public abstract class ActorController : MonoBehaviour
         }
     }
 
-    private AnimatorOverrideController m_animOverrideController = null;
-    private AttackAnimBehaviour attackAnimSMB;
+    private string m_isShootingAnimParamName = "IsShooting";
+    private bool m_isShooting = false;
+    public bool isShooting
+    {
+        get => m_isShooting;
+        protected set {
+            if (value != m_isShooting) {
+                // NOTE: Doesn't trigger SetBool() in m_isAttacking
+                m_isShooting = m_isAttacking = value;
+                
+                animator.SetBool(m_isShootingAnimParamName, value);
+            }
+        }
+    }
+
+    private Vector2 m_attackDir = Vector2.right;
+    public Vector2 attackDir
+    {
+        get => m_attackDir;
+        protected set => m_attackDir = value;
+    }
+
+    private AnimatorOverrideController animOverrideController = null;
+    //private AttackAnimBehaviour attackAnimSMB;
+    //private string defaultAttackAnimClipName = "Attack";
+    //private string currentAttackAnimClipName;
 
 
     // ---------- Events ----------
@@ -105,11 +130,13 @@ public abstract class ActorController : MonoBehaviour
         //attack = GetComponent<AttackBase>();
 
         if (animator != null) {
-            m_animOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
-            animator.runtimeAnimatorController = m_animOverrideController;
-
-            attackAnimSMB = animator.GetBehaviour<AttackAnimBehaviour>();
+            animOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+            animator.runtimeAnimatorController = animOverrideController;
         }
+
+        //if (attack != null) {
+        //    ConfigureAttack(attack.animationClip, defaultAttackAnimClipName);
+        //}
     }
 
     protected virtual void OnEnable()
@@ -118,9 +145,14 @@ public abstract class ActorController : MonoBehaviour
             health.OnDamageTaken += DamageTakenHandler;
         }
 
-        if (attackAnimSMB != null) {
-            attackAnimSMB.OnAttackAnimEnd += AttackAnimEndHandler;
+        foreach (AttackAnimBehaviour behav in animator.GetBehaviours<AttackAnimBehaviour>()) {
+            behav.OnAttackAnimEnd += AttackAnimEndHandler;
         }
+
+        //AttackAnimBehaviour attackAnimSMB = animator.GetBehaviour<AttackAnimBehaviour>();
+        //if (attackAnimSMB != null) {
+        //    attackAnimSMB.OnAttackAnimEnd += AttackAnimEndHandler;
+        //}
     }
 
     protected virtual void OnDisable()
@@ -129,9 +161,14 @@ public abstract class ActorController : MonoBehaviour
             health.OnDamageTaken -= DamageTakenHandler;
         }
 
-        if (attackAnimSMB != null) {
-            attackAnimSMB.OnAttackAnimEnd -= AttackAnimEndHandler;
+        foreach (AttackAnimBehaviour behav in animator.GetBehaviours<AttackAnimBehaviour>()) {
+            behav.OnAttackAnimEnd -= AttackAnimEndHandler;
         }
+
+        //AttackAnimBehaviour attackAnimSMB = animator.GetBehaviour<AttackAnimBehaviour>();
+        //if (attackAnimSMB != null) {
+        //    attackAnimSMB.OnAttackAnimEnd -= AttackAnimEndHandler;
+        //}
     }
 
     protected virtual void OnValidate()
@@ -169,19 +206,28 @@ public abstract class ActorController : MonoBehaviour
 
     public void SetMovementEnable(bool value)
     {
-        canMove = value;
-    }
-
-    public void ConfigureAttack(AnimationClip attackAnimClip, string currClipName)
-    {
-        if (m_animOverrideController != null) {
-            m_animOverrideController[currClipName] = attackAnimClip;
+        if (value != canMove) {
+            //Debug.Log($"obj {name} switching canMove to {value}");
         }
+        canMove = value;
     }
 
     public void Attack()
     {
-        isAttacking = true;
+        Attack(faceDir);
+    }
+
+    public void Attack(Vector2 direction)
+    {
+        attackDir = direction.normalized;
+        faceDir = attackDir;
+        
+        if (attack is RangeAttack) {
+            isShooting = true;
+        }
+        else {
+            isAttacking = true;
+        }
     }
 
     public void TakeDamage(int damage)
@@ -208,21 +254,26 @@ public abstract class ActorController : MonoBehaviour
         }
     }
 
-    //private void UpdateAnimation()
+    private void CheckAndFlipDir()
+    {
+        Vector3 newScale = transform.localScale;
+        if (faceDir.x < -0.1f && newScale.x > 0 ||
+            faceDir.x > 0.1f && newScale.x < 0) {
+            newScale.x *= -1;
+            transform.localScale = newScale;
+        }
+    }
+
+    //private void ConfigureAttack(AnimationClip attackAnimClip, string currClipName)
     //{
-    //    animator.SetFloat("MoveX", movement.direction.x);
-    //    animator.SetFloat("MoveY", movement.direction.y);
-
-    //    animator.SetFloat("FaceX", faceDir.x);
-    //    animator.SetFloat("FaceY", faceDir.y);
-
-    //    if (movement.direction.sqrMagnitude > movement.moveThreshold) {
-    //        animator.SetBool("IsMoving", true);
-    //    } else {
-    //        animator.SetBool("IsMoving", false);
+    //    if (animOverrideController != null) {
+    //        animOverrideController[currClipName] = attackAnimClip;
+    //        currentAttackAnimClipName = attackAnimClip.name;
     //    }
     //}
 
+
+    // ---------- Coroutines ----------
     private IEnumerator KnockbackCR(Transform origin, float force, float duration)
     {
         canMove = false;
@@ -236,21 +287,17 @@ public abstract class ActorController : MonoBehaviour
         canMove = true;
     }
 
-    private void CheckAndFlipDir()
-    {
-        Vector3 newScale = transform.localScale;
-        if (faceDir.x < -0.1f && newScale.x > 0 ||
-            faceDir.x > 0.1f && newScale.x < 0) {
-            newScale.x *= -1;
-            transform.localScale = newScale;
-        }
-    }
-
 
     // ---------- Event Handlers ---------- 
     private void AttackAnimEndHandler()
     {
-        isAttacking = false;
+        if (isShooting) {
+            isShooting = false;
+        }
+        else {
+            isAttacking = false;
+        }
+
         OnAttackAnimationEnd?.Invoke();
     }
 
