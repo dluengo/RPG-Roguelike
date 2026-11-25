@@ -6,7 +6,7 @@ using System.Collections;
 public class TrapController : MonoBehaviour
 {
     // ---------- Members ----------
-    [Header("TrapController Setup")]
+    [Header("--- TrapController Settings ---")]
     [SerializeField] protected AnimationClip m_activateClip;
     [SerializeField] protected AnimationClip m_deactivateClip;
     [SerializeField] protected AnimationClip m_idleClip;
@@ -79,14 +79,16 @@ public class TrapController : MonoBehaviour
     // ---------- Collision Methods ----------
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.layer == m_playerLayer) {
+        int collisionLayerMask = 1 << collision.gameObject.layer;
+        if ((m_playerLayer.value & collisionLayerMask) != 0) {
             ActivateTrap(collision);
         }
     }
 
     protected virtual void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.gameObject.layer == m_playerLayer) {
+        int collisionLayerMask = 1 << collision.gameObject.layer;
+        if ((m_playerLayer.value & collisionLayerMask) != 0) {
             ActivateTrap(collision);
         }
     }

@@ -4,12 +4,13 @@ using UnityEngine;
 public class ProjectileTrapController : TrapController
 {
     // ---------- Members ----------
-    [Header("ProjectileTrapController Setup")]
+    [Header("--- ProjectileTrapController Settings ---")]
     [SerializeField] protected GameObject projectilePrefab;
     [SerializeField] protected float projectileSpeed = 10f;
     [SerializeField] protected Vector2 projectileDirection = Vector2.right;
 
     [SerializeField] protected Transform m_launchPosition;
+    [SerializeField] protected float m_projAngleOffset;
 
 
     // ---------- Unity Methods ----------
@@ -37,7 +38,7 @@ public class ProjectileTrapController : TrapController
             projectilePrefab,
             m_launchPosition.position,
             projectileDirection,
-            0,
+            m_projAngleOffset,
             m_playerLayer,
             damage,
             projectileSpeed,

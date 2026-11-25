@@ -2,7 +2,7 @@
 - Project name: RPG-Roguelike
 - Unity version: Unity 6000.5.8f1
 - Active game object:
-  - Name: Skeleton
-  - Tag: Enemy
-  - Layer: Enemy
+  - Name: Arrow Trap
+  - Tag: Untagged
+  - Layer: Default
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->
