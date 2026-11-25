@@ -28,14 +28,6 @@ public abstract class AttackBase : MonoBehaviour
         protected set => m_cooldown = value;
     }
 
-    //// NOTE: When range is 0 internally we decide a value for it.
-    //[SerializeField] protected float m_range = 0;
-    //public float range
-    //{
-    //    get => m_range;
-    //    protected set => m_range = value;
-    //}
-
     protected bool m_onCooldown = false;
     public bool onCooldown
     {
@@ -52,7 +44,6 @@ public abstract class AttackBase : MonoBehaviour
 
 
     // ---------- Events ---------- 
-    public event Action<Collider2D> OnAttackHit;
     public event Action OnAttackEnd;
 
 
@@ -75,11 +66,10 @@ public abstract class AttackBase : MonoBehaviour
         actor.OnAttackAnimationEnd -= AttackAnimationEndHandler;
     }
 
-    protected void OnValidate()
+    protected virtual void OnValidate()
     {
         damage = m_damage;
         cooldown = m_cooldown;
-        //range = m_range;
     }
 
 

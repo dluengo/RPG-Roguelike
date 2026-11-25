@@ -25,6 +25,8 @@ public class RangeAttack : AttackBase
         Debug.Assert(spawnPoint != null, $"object {name} doesn't have a spawn point set for projectile creation");
     }
 
+
+    // ---------- Attack Methods ---------- 
     public override bool StartAttack(Vector2 direction)
     {
         bool canAttack = base.StartAttack(direction);
@@ -42,17 +44,24 @@ public class RangeAttack : AttackBase
     }
 
 
-    // ---------- Animation Event Methods ---------- 
+    // ---------- Animation Event Method ---------- 
     public virtual void ShootProjectile()
     {
         Vector2 projectileDir = target != null ?
-            (target.position - transform.position).normalized :
+            (target.position - spawnPoint.position).normalized :
             actor.faceDir;
 
+        ShootProjectile(projectileDir);
+    }
+
+
+    // ---------- Shoot projectile method ---------- 
+    public virtual void ShootProjectile(Vector2 direction)
+    {
         ProjectileController newProjectile = ProjectileController.CreateProjectile(
             projectilePrefab,
             spawnPoint.position,
-            projectileDir,
+            direction,
             rotationOffset,
             actor.enemyLayer,
             damage,
