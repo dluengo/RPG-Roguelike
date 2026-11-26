@@ -4,15 +4,15 @@ public class KeepDistance : MovementBase
 {
     // ---------- Members ----------
     [Header("--- KeepDistance Settings ---")]
-    [SerializeField] protected Transform target;
     [SerializeField] protected float minDistance = 5f;
     [SerializeField] protected float maxDistance = 10f;
 
+    [HideInInspector] public Transform target;
+
 
     // ---------- Unity Methods ----------
-    protected override void Awake()
+    protected void Start()
     {
-        base.Awake();
         Debug.Assert(target != null, $"object {name} doesn't have a target assigned");
     }
 

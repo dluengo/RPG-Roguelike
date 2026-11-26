@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class MeleeAttack : AttackBase
 {
@@ -35,7 +36,7 @@ public class MeleeAttack : AttackBase
     {
         List<RaycastHit2D> hits = new List<RaycastHit2D>();
         ContactFilter2D filter = new ContactFilter2D();
-        filter.layerMask = actor.enemyLayer;
+        filter.layerMask = actor.enemyLayers;
 
         // NOTE: This is the reason we need hitArea to have a Collider2D component.
         // In order to cast a non-standard shape in the world you need to use

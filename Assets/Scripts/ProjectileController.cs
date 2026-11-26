@@ -6,7 +6,7 @@ public class ProjectileController : MonoBehaviour
 {
     // ---------- Members ----------
     [Header("--- ProjectileController Settings ---")]
-    [SerializeField] protected LayerMask damageLayer;
+    [SerializeField] protected LayerMask damageLayers;
     [SerializeField] protected int damage;
     [SerializeField] protected float speed;
     [SerializeField] protected float knockbackForce;
@@ -15,6 +15,7 @@ public class ProjectileController : MonoBehaviour
     [SerializeField] protected float rotationOffset;
 
     private Vector2 direction;
+    private GameObject throwerGO;
 
 
     // ---------- Unity Methods ----------
@@ -27,16 +28,39 @@ public class ProjectileController : MonoBehaviour
     // ---------- Collision Methods ----------
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        int collisionLayerMask = 1 << collision.gameObject.layer;
-        if ((damageLayer.value & collisionLayerMask) != 0) {
+        GameObject triggerGO = collision.gameObject;
+        ActorController triggerActor = collision.GetComponent<ActorController>();
 
-            ActorController enemyActor = collision.GetComponent<ActorController>();
-            if (enemyActor != null) {
-                enemyActor.TakeDamage(damage);
-                enemyActor.Knockback(transform, knockbackForce, knockbackDuration);
+        
+        TrapController throwerTrap = null;
+        ActorController throwerActor = throwerGO.GetComponent<ActorController>();
+        if (throwerActor == null) {
+            throwerTrap = throwerGO.GetComponent<TrapController>();
+        }
+
+
+        // NOTE: This can be simplified in two if statements, but for now i rather
+        // leave it as is as I think it is easier to follow the logic.
+        if (throwerTrap != null) {
+            if (triggerActor != null) {
+                if (throwerTrap.IsEnemy(triggerActor)) {
+                    triggerActor.TakeDamage(damage);
+                    triggerActor.Knockback(transform, knockbackForce, knockbackDuration);
+                    Destroy(gameObject);
+                }
             }
-
-            Destroy(gameObject);
+        }
+        else if (throwerActor != null) {
+            if (triggerActor != null) {
+                if (throwerActor.IsEnemy(triggerActor)) {
+                    triggerActor.TakeDamage(damage);
+                    triggerActor.Knockback(transform, knockbackForce, knockbackDuration);
+                    Destroy(gameObject);
+                }
+            }
+        }
+        else {
+            Debug.LogWarning($"obj {name}: throwerGO is not either TrapController or ActorController!");
         }
     }
 
@@ -46,7 +70,7 @@ public class ProjectileController : MonoBehaviour
         Vector2 spawnCoords,
         Vector2 direction,
         float rotationOffset,
-        LayerMask damageLayer,
+        GameObject thrower,
         int damage = 1,
         float speed = 10,
         float knockbackForce = 0,
@@ -62,7 +86,7 @@ public class ProjectileController : MonoBehaviour
             ).GetComponent<ProjectileController>();
         newProjectile.direction = direction.normalized;
         newProjectile.speed = speed;
-        newProjectile.damageLayer = damageLayer;
+        newProjectile.throwerGO = thrower;
         newProjectile.damage = damage;
         newProjectile.knockbackForce = knockbackForce;
         newProjectile.knockbackDuration = knockbackDuration;

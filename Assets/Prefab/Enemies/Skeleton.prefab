@@ -69,6 +69,37 @@ CapsuleCollider2D:
   m_Offset: {x: 0.3269186, y: -0.2656821}
   m_Size: {x: 1.25671, y: 1.1222969}
   m_Direction: 1
+--- !u!1 &5391534366134618748
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1690323923225323122}
+  m_Layer: 7
+  m_Name: Proj Spawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1690323923225323122
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5391534366134618748}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.616, y: -0.077, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7931679567382760765}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8097690662425679623
 GameObject:
   m_ObjectHideFlags: 0
@@ -83,8 +114,10 @@ GameObject:
   - component: {fileID: 2740730332634515075}
   - component: {fileID: 3540580100789478801}
   - component: {fileID: 6004544848629629324}
-  - component: {fileID: 2919799662615545951}
-  - component: {fileID: 1693539218389944520}
+  - component: {fileID: 6402473142669255778}
+  - component: {fileID: 2945389189337349622}
+  - component: {fileID: 3321578708919410295}
+  - component: {fileID: 4213050829305089598}
   m_Layer: 7
   m_Name: Skeleton
   m_TagString: Enemy
@@ -106,6 +139,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4836387845865490620}
+  - {fileID: 1690323923225323122}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1779564998812204430
@@ -178,7 +212,7 @@ Animator:
   m_GameObject: {fileID: 8097690662425679623}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: d4f97d218c212f946a4f37de34f5b3cc, type: 2}
+  m_Controller: {fileID: 9100000, guid: a141bc4acd89609418c72a81ee3b95da, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -266,31 +300,56 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9b3fb7edf65bc2469f0ea1952758a79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkeletonController
-  m_faceDir: {x: 1, y: 0}
-  m_popupPrefab: {fileID: 463477315659997099, guid: f50d6e4989adc734a93d7620bf59a7ea, type: 3}
-  movement: {fileID: 2919799662615545951}
-  attack: {fileID: 1693539218389944520}
-  m_enemyLayer:
+  m_popupPrefab: {fileID: 0}
+  movement: {fileID: 4213050829305089598}
+  attack: {fileID: 3321578708919410295}
+  m_enemyLayers:
     serializedVersion: 2
     m_Bits: 64
+  idleClip: {fileID: 7400000, guid: 77bcc8826c67c4b49b6d14b1288ae9b9, type: 2}
+  deathClip: {fileID: 7400000, guid: 1c4cb3b0ce1a9c047ba4be18d4b0e0a7, type: 2}
   target: {fileID: 0}
-  m_rangeStartAttacking: 0.85
---- !u!114 &2919799662615545951
+--- !u!114 &6402473142669255778
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8097690662425679623}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c7f0d1ad1046544d9587ef0b343a6fc, type: 3}
+  m_Script: {fileID: 11500000, guid: d8a61e8d4d04f8d4e9fb75c199612512, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Chase
+  m_EditorClassIdentifier: Assembly-CSharp::KeepDistance
+  m_animationClip: {fileID: 7400000, guid: 5bab6b63c281ad54bb1a55bbab265cf5, type: 2}
   m_speed: 2
   m_moveThreshold: 0.1
   target: {fileID: 0}
---- !u!114 &1693539218389944520
+  minDistance: 2
+  maxDistance: 3
+--- !u!114 &2945389189337349622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8097690662425679623}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8bd66478ef66fa8408645f1e817f40e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ConeRangeAttack
+  m_animationClip: {fileID: 7400000, guid: af50407193183ae4da1aad88706edf55, type: 2}
+  m_damage: 1
+  m_cooldown: 1.5
+  m_range: 0
+  m_projectileSpeed: 7
+  projectilePrefab: {fileID: 6926534685508259164, guid: 0b92e64bc6400f04f85edeb0233ac160, type: 3}
+  spawnPoint: {fileID: 1690323923225323122}
+  rotationOffset: 90
+  m_numProjectiles: 3
+  m_coneAngle: 60
+--- !u!114 &3321578708919410295
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -302,6 +361,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb0f41a7cf894f349bd679bd1ea81ab8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeAttack
-  attackAnimationClip: {fileID: 7400000, guid: 246df6d195b6a534ebdd44850e8b4e54, type: 2}
+  m_animationClip: {fileID: 7400000, guid: 246df6d195b6a534ebdd44850e8b4e54, type: 2}
   m_damage: 1
+  m_cooldown: 1
+  m_range: 1
   hitArea: {fileID: 485078318161038426}
+--- !u!114 &4213050829305089598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8097690662425679623}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c7f0d1ad1046544d9587ef0b343a6fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Chase
+  m_animationClip: {fileID: 7400000, guid: 5bab6b63c281ad54bb1a55bbab265cf5, type: 2}
+  m_speed: 2
+  m_moveThreshold: 0.1
+  target: {fileID: 0}
+  minDistance: 1

@@ -8,12 +8,12 @@ public abstract class AttackBase : MonoBehaviour
 {
     // ---------- Members ----------
     [Header("--- AttackBase Settings ---")]
-    [SerializeField] protected AnimationClip m_animationClip;
-    public AnimationClip animationClip
-    {
-        get => m_animationClip;
-        protected set => m_animationClip = value;
-    }
+    //[SerializeField] protected AnimationClip m_animationClip;
+    //public AnimationClip animationClip
+    //{
+    //    get => m_animationClip;
+    //    protected set => m_animationClip = value;
+    //}
     [SerializeField] protected int m_damage;
     public int damage
     {
@@ -27,6 +27,14 @@ public abstract class AttackBase : MonoBehaviour
         get => m_cooldown;
         protected set => m_cooldown = value;
     }
+
+    [SerializeField] protected float m_range;
+    public float range
+    {
+        get => m_range;
+        protected set => m_range = value;
+    }
+
 
     protected bool m_onCooldown = false;
     public bool onCooldown
@@ -53,7 +61,7 @@ public abstract class AttackBase : MonoBehaviour
         actor = GetComponent<ActorController>();
         Debug.Assert(actor != null, $"object {name} doesn't have an ActorController component");
 
-        Debug.Assert(animationClip != null, $"object {name} doesn't have an AnimationClip component");
+        //Debug.Assert(animationClip != null, $"object {name} doesn't have an AnimationClip component");
     }
 
     protected virtual void OnEnable()
@@ -70,6 +78,7 @@ public abstract class AttackBase : MonoBehaviour
     {
         damage = m_damage;
         cooldown = m_cooldown;
+        range = m_range;
     }
 
 

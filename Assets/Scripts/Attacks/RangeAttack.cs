@@ -63,7 +63,7 @@ public class RangeAttack : AttackBase
             spawnPoint.position,
             direction,
             rotationOffset,
-            actor.enemyLayer,
+            actor.gameObject,
             damage,
             projectileSpeed,
             knockbackForce,

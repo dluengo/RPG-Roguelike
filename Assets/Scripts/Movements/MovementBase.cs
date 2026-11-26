@@ -5,6 +5,13 @@ public abstract class MovementBase : MonoBehaviour
 {
     // --------- Members ----------
     [Header("--- MovementBase Settings ---")]
+    //[SerializeField] protected AnimationClip m_animationClip;
+    //public AnimationClip animationClip
+    //{
+    //    get => m_animationClip;
+    //    protected set => m_animationClip = value;
+    //}
+
     [SerializeField] protected float m_speed = 5f;
     public float speed
     {
@@ -34,6 +41,7 @@ public abstract class MovementBase : MonoBehaviour
 
     protected void OnValidate()
     {
+        //animationClip = m_animationClip;
         speed = m_speed;
     }
 }

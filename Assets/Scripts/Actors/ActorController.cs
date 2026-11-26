@@ -8,11 +8,15 @@ public abstract class ActorController : MonoBehaviour
 {
     // ---------- Members ----------
     [Header("--- ActorController Settings ---")]
-    [SerializeField] private Vector2 m_faceDir = Vector2.right;
+    [SerializeField] protected GameObject m_popupPrefab;
+    [SerializeField] protected MovementBase movement;
+    [SerializeField] protected AttackBase attack;
+
+    private Vector2 m_faceDir = Vector2.right;
     public Vector2 faceDir
     {
         get => m_faceDir;
-        set {
+        protected set {
             if (value.sqrMagnitude > 0.1f) {
                 m_faceDir = value.normalized;
                 CheckAndFlipDir();
@@ -20,18 +24,14 @@ public abstract class ActorController : MonoBehaviour
         }
     }
 
-    [SerializeField] protected GameObject m_popupPrefab;
-    [SerializeField] protected MovementBase movement;
-    [SerializeField] protected AttackBase attack;
-
-    // NOTE: This property has a variety of values. It represents the layer
-    // where the enemies of this ActorController are. Enemy for the player
-    // and Player for the enemies.
-    [SerializeField] protected LayerMask m_enemyLayer;
-    public LayerMask enemyLayer
+    // NOTE: Usually just one layer, but many layers could be enemies of an
+    // ActorController. For instance, there may be many different factions,
+    // each one being hostely to the others.
+    [SerializeField] protected LayerMask m_enemyLayers;
+    public LayerMask enemyLayers
     {
-        get => m_enemyLayer;
-        protected set => m_enemyLayer = value;
+        get => m_enemyLayers;
+        protected set => m_enemyLayers = value;
     }
 
     protected Rigidbody2D rb;
@@ -64,31 +64,35 @@ public abstract class ActorController : MonoBehaviour
         }
     }
 
-    private string m_isAttackingAnimParamName = "IsAttacking";
+    private string m_isAttackingAnimParamName = "Attack";
     private bool m_isAttacking = false;
     public bool isAttacking
     {
         get => m_isAttacking;
         protected set {
-            // We are actually switching.
-            if (value != m_isAttacking) {
-                m_isAttacking = value;
-                animator.SetBool(m_isAttackingAnimParamName, value);
+            // We are actually switching and start attacking
+            if (m_isAttacking != value && value == true) {
+                animator.SetTrigger(m_isAttackingAnimParamName);
             }
+
+            m_isAttacking = value;
         }
     }
 
-    private string m_isShootingAnimParamName = "IsShooting";
+    private string m_isShootingAnimParamName = "Shoot";
     private bool m_isShooting = false;
     public bool isShooting
     {
         get => m_isShooting;
         protected set {
             if (value != m_isShooting) {
+                // We are actually switching and start attacking.
+                if (m_isShooting != value && value == true) {
+                    animator.SetTrigger(m_isShootingAnimParamName);
+                }
+
                 // NOTE: Doesn't trigger SetBool() in m_isAttacking
                 m_isShooting = m_isAttacking = value;
-                
-                animator.SetBool(m_isShootingAnimParamName, value);
             }
         }
     }
@@ -100,10 +104,14 @@ public abstract class ActorController : MonoBehaviour
         protected set => m_attackDir = value;
     }
 
-    private AnimatorOverrideController animOverrideController = null;
-    //private AttackAnimBehaviour attackAnimSMB;
-    //private string defaultAttackAnimClipName = "Attack";
-    //private string currentAttackAnimClipName;
+    //[SerializeField] protected AnimationClip idleClip;
+    //[SerializeField] protected AnimationClip deathClip;
+    //private AnimatorOverrideController animOverrideController = null;
+    //private string animDefaultIdleClipName = "Idle-default";
+    //private string animDefaultMoveClipName = "Move-default";
+    //private string animDefaultAttackClipName = "Attack-default";
+    //private string animDefaultShootClipName = "Shoot-default";
+    //private string animDefaultDeathClipName = "Death-default";
 
 
     // ---------- Events ----------
@@ -129,14 +137,7 @@ public abstract class ActorController : MonoBehaviour
         // NOTE: Actors are allowed to not have a AttackBase component, they won't attack.
         //attack = GetComponent<AttackBase>();
 
-        if (animator != null) {
-            animOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
-            animator.runtimeAnimatorController = animOverrideController;
-        }
-
-        //if (attack != null) {
-        //    ConfigureAttack(attack.animationClip, defaultAttackAnimClipName);
-        //}
+        //AnimatorSetup();
     }
 
     protected virtual void OnEnable()
@@ -145,14 +146,15 @@ public abstract class ActorController : MonoBehaviour
             health.OnDamageTaken += DamageTakenHandler;
         }
 
-        foreach (AttackAnimBehaviour behav in animator.GetBehaviours<AttackAnimBehaviour>()) {
-            behav.OnAttackAnimEnd += AttackAnimEndHandler;
+        AttackAnimBehaviour[] behavList = animator.GetBehaviours<AttackAnimBehaviour>();
+        if (behavList.Length > 0) {
+            foreach (AttackAnimBehaviour behav in behavList) {
+                behav.OnAttackAnimEnd += AttackAnimEndHandler;
+            }
         }
-
-        //AttackAnimBehaviour attackAnimSMB = animator.GetBehaviour<AttackAnimBehaviour>();
-        //if (attackAnimSMB != null) {
-        //    attackAnimSMB.OnAttackAnimEnd += AttackAnimEndHandler;
-        //}
+        else {
+            Debug.LogWarning($"obj {name}: No AttackAnimBehaviours in Animator Controller");
+        }
     }
 
     protected virtual void OnDisable()
@@ -164,16 +166,11 @@ public abstract class ActorController : MonoBehaviour
         foreach (AttackAnimBehaviour behav in animator.GetBehaviours<AttackAnimBehaviour>()) {
             behav.OnAttackAnimEnd -= AttackAnimEndHandler;
         }
-
-        //AttackAnimBehaviour attackAnimSMB = animator.GetBehaviour<AttackAnimBehaviour>();
-        //if (attackAnimSMB != null) {
-        //    attackAnimSMB.OnAttackAnimEnd -= AttackAnimEndHandler;
-        //}
     }
 
     protected virtual void OnValidate()
     {
-        enemyLayer = m_enemyLayer;
+        enemyLayers = m_enemyLayers;
     }
 
 
@@ -198,6 +195,11 @@ public abstract class ActorController : MonoBehaviour
             }
 
             isMoving = false;
+        }
+        else {
+            // If the actor shouldn't move set it's velocity to zero every frame
+            // so even if something push it it doesn't move.
+            rb.linearVelocity = Vector2.zero;
         }
     }
 
@@ -242,6 +244,11 @@ public abstract class ActorController : MonoBehaviour
         StartCoroutine(KnockbackCR(origin, force, duration));
     }
 
+    public bool IsEnemy(ActorController actor)
+    {
+        return ((1 << actor.gameObject.layer) & enemyLayers) != 0;
+    }
+
 
     // ---------- Helper Methods ----------
 
@@ -269,6 +276,35 @@ public abstract class ActorController : MonoBehaviour
     //    if (animOverrideController != null) {
     //        animOverrideController[currClipName] = attackAnimClip;
     //        currentAttackAnimClipName = attackAnimClip.name;
+    //    }
+    //}
+
+    //private void AnimatorSetup()
+    //{
+    //    if (animator != null) {
+    //        animOverrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+    //        animator.runtimeAnimatorController = animOverrideController;
+
+    //        if (idleClip != null) {
+    //            animOverrideController[animDefaultIdleClipName] = idleClip;
+    //        }
+
+    //        if (movement != null && movement.animationClip != null) {
+    //            animOverrideController[animDefaultMoveClipName] = movement.animationClip;
+    //        }
+
+    //        if (attack != null) {
+    //            if (attack is MeleeAttack && attack.animationClip != null) {
+    //                animOverrideController[animDefaultAttackClipName] = attack.animationClip;
+    //            }
+    //            else if (attack is RangeAttack && attack.animationClip != null) {
+    //                animOverrideController[animDefaultShootClipName] = attack.animationClip;
+    //            }
+    //        }
+
+    //        if (deathClip != null) {
+    //            animOverrideController[animDefaultDeathClipName] = deathClip;
+    //        }
     //    }
     //}
 
@@ -303,7 +339,7 @@ public abstract class ActorController : MonoBehaviour
 
     private void DamageTakenHandler(int damage)
     {
-        animator.SetTrigger("TurnRed");
+        //animator.SetTrigger("TurnRed");
 
         GameObject popupGO = Instantiate(m_popupPrefab, transform.position, Quaternion.identity);
         if (popupGO != null) {

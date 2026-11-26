@@ -39,9 +39,15 @@ public class TrapController : MonoBehaviour
         private set => m_knockbackDuration = value;
     }
 
+    [SerializeField] protected LayerMask m_enemyLayers;
+    public LayerMask enemyLayers
+    {
+        get => m_enemyLayers;
+        protected set => m_enemyLayers = value;
+    }
+
     protected Animator anim;
-    //protected string m_playerTag = "Player";
-    protected LayerMask m_playerLayer;
+    
 
     private AnimatorOverrideController m_animOverrideController;
     private string m_activateAnimParamName = "Activate";
@@ -62,7 +68,7 @@ public class TrapController : MonoBehaviour
         anim = GetComponent<Animator>();
         Debug.Assert(anim != null, $"object {name} doesn't have an Animator component");
 
-        m_playerLayer = LayerMask.GetMask("Player");
+        m_enemyLayers = LayerMask.GetMask("Player");
 
         SetupAnimationClips();
     }
@@ -73,6 +79,7 @@ public class TrapController : MonoBehaviour
         knockbackForce = m_knockbackForce;
         knockbackDuration = m_knockbackDuration;
         cooldown = m_cooldown;
+        enemyLayers = m_enemyLayers;
     }
 
 
@@ -80,7 +87,7 @@ public class TrapController : MonoBehaviour
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
         int collisionLayerMask = 1 << collision.gameObject.layer;
-        if ((m_playerLayer.value & collisionLayerMask) != 0) {
+        if ((m_enemyLayers.value & collisionLayerMask) != 0) {
             ActivateTrap(collision);
         }
     }
@@ -88,13 +95,20 @@ public class TrapController : MonoBehaviour
     protected virtual void OnTriggerStay2D(Collider2D collision)
     {
         int collisionLayerMask = 1 << collision.gameObject.layer;
-        if ((m_playerLayer.value & collisionLayerMask) != 0) {
+        if ((m_enemyLayers.value & collisionLayerMask) != 0) {
             ActivateTrap(collision);
         }
     }
 
 
     // ---------- Public Methods ----------
+    public bool IsEnemy(ActorController actor)
+    {
+        return ((1 << actor.gameObject.layer) & enemyLayers) != 0;
+    }
+
+
+    // ---------- Protected Methods ----------
     protected virtual void ActivateTrap(Collider2D collision)
     {
         if (m_onCooldown) {

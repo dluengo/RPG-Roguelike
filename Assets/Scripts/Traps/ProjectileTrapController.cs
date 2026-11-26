@@ -39,7 +39,7 @@ public class ProjectileTrapController : TrapController
             m_launchPosition.position,
             projectileDirection,
             m_projAngleOffset,
-            m_playerLayer,
+            gameObject,
             damage,
             projectileSpeed,
             knockbackForce,
